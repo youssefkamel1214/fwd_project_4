@@ -2,6 +2,7 @@ package com.udacity.project4
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.data.ReminderDataSource
@@ -63,6 +64,11 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
+    }
+    @Before
+    fun registerIdlingResource() {
+//        IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
+//        IdlingRegistry.getInstance().register(dataBindingIdlingResource)
     }
 
 

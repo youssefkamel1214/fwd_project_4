@@ -42,4 +42,7 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="savelocationtext">click here to save current location</string>
     <string name="maptext">map to select poi</string>
+    <string name="title">Title:</string>
+    <string name="descrption">Description :</string>
+    <string name="location">Location :</string>
 </resources>

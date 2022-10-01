@@ -77,7 +77,7 @@ class AuthenticationActivity : AppCompatActivity() {
         if (requestCode == Constants.SignCode) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode != Activity.RESULT_OK) {
-                Toast.makeText(this,response?.error?.message, Toast.LENGTH_LONG).show()
+//                Toast.makeText(this,response?.error?.message, Toast.LENGTH_LONG).show()
                 Log.i(Constants.AUTHTAG, "Sign in unsuccessful ${response?.error?.errorCode}")
             }
         }
