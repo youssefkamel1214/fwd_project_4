@@ -31,10 +31,12 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.Constants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.lang.Exception
 import java.util.*
 
 @Suppress("DEPRECATED_IDENTITY_EQUALS")
 class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
+    private val TAG = SelectLocationFragment::class.java.simpleName
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -70,7 +72,20 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         }
         return binding.root
     }
+    private fun setMapStyle(map: GoogleMap) {
+        try {
+            // Customize the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(),
+                    R.raw.map_style
+                )
+            )
+        }catch (e:Exception){
 
+        }
+    }
     override fun onStart() {
         super.onStart()
         if(isPermissionGranted()) {
@@ -205,7 +220,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
             moveCamera(CameraUpdateFactory.newLatLngZoom(home,15f ))
             setMapLongClick(this)
             setPoiClick(this)
-
+            setMapStyle(this)
         }
         if (isPermissionGranted()) {
             makehomelocation()
