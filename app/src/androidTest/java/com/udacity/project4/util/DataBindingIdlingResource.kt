@@ -15,6 +15,7 @@
  */
 package com.udacity.project4.util
 
+import android.app.Activity
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -23,6 +24,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
+import com.udacity.project4.locationreminders.RemindersActivity
 import java.util.UUID
 
 /**
@@ -108,4 +110,11 @@ fun DataBindingIdlingResource.monitorFragment(fragmentScenario: FragmentScenario
     fragmentScenario.onFragment {
         this.activity = it.requireActivity()
     }
+}
+fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity {
+    lateinit var activity: Activity
+    activityScenario.onActivity {
+        activity = it
+    }
+    return activity
 }
