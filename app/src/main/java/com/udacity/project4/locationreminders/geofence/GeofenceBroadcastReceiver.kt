@@ -24,9 +24,9 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             val geofencingEvent = GeofencingEvent.fromIntent(intent)
             if (geofencingEvent!!.hasError()) {
                 Toast.makeText(context, geofencingEvent.errorCode, Toast.LENGTH_LONG).show()
-                Log.e(Constants.Broadcast, geofencingEvent.errorCode.toString())
                 return
             }
+            Log.e(Constants.Broadcast, "enter 1111geofence code${geofencingEvent.geofenceTransition}" )
             GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
         }
     }

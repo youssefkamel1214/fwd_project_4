@@ -14,7 +14,7 @@ class FakeDataSource : ReminderDataSource {
     }
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
         if (shouldReturnError){
-            return Result.Error("noData")
+            return Result.Error("Reminders not found")
         }
         return Result.Success(remidersServiceData.toList())
     }
@@ -25,9 +25,13 @@ class FakeDataSource : ReminderDataSource {
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
         if (shouldReturnError){
-            return Result.Error("noData")
+            return Result.Error("Reminders not found")
         }
-        return Result.Success((remidersServiceData.takeWhile { it.id==id })[0])
+        val ans=remidersServiceData.find { it.id==id }
+        if(ans==null){
+            return Result.Error("Reminder not found!")
+        }
+           return Result.Success(ans)
     }
 
     override suspend fun deleteAllReminders() {

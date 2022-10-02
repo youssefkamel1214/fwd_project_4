@@ -30,6 +30,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.Constants
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
+import kotlinx.android.synthetic.main.fragment_select_location.*
 import org.koin.android.ext.android.inject
 import java.lang.Exception
 import java.util.*
@@ -42,12 +43,8 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
     private  var mMap: GoogleMap? =null
-
     var poiMarker:Marker?=null
-    private val runningQOrLater = android.os.Build.VERSION.SDK_INT >=
-            android.os.Build.VERSION_CODES.Q
-    private val runneronandroid11=android.os.Build.VERSION.SDK_INT >
-            android.os.Build.VERSION_CODES.Q
+    private val client by lazy { LocationServices.getFusedLocationProviderClient(requireActivity()) }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -121,17 +118,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     }
     @TargetApi(29 )
     private fun requstpremssion() {
-        var permissionsArray = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        val resultCode = when(runningQOrLater){
-            true and (!runneronandroid11)->{
-                permissionsArray+=Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                Constants.fine_course_background
-            }
-            else->{
-                Constants.fine_course
-            }
-        }
-        requestPermissions(permissionsArray,resultCode)
+        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),Constants.fine_course)
     }
 
     @SuppressLint("MissingPermission")
@@ -140,36 +127,19 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        grantResults.forEach {
-            if(it==PackageManager.PERMISSION_DENIED){
-                if(runningQOrLater)
-                    _viewModel.showsettingsnackBar.value= Constants.fine_course_background
-                else
-                    _viewModel.showsettingsnackBar.value= Constants.fine_course
+            if(grantResults[0]==PackageManager.PERMISSION_DENIED) {
+                _viewModel.showsettingsnackBar.value = Constants.fine_course
                 return
             }
-        }
-        if( android.os.Build.VERSION.SDK_INT>android.os.Build.VERSION_CODES.Q)
-        {
-            requestPermissions(arrayOf( Manifest.permission.ACCESS_BACKGROUND_LOCATION), Constants.fine_course_background)
-            return
-        }
-        if (isPermissionGranted())
             makehomelocation()
     }
     @TargetApi(29)
     private fun isPermissionGranted() : Boolean {
-        var bool= ContextCompat.checkSelfPermission(
+        return ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
         ) === PackageManager.PERMISSION_GRANTED
-        if(runningQOrLater) {
-            bool = bool && ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-        return bool
+
     }
     private fun onLocationSelected() {
         //        TODO: When the user confirms on the selected location,
@@ -214,10 +184,7 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     override fun onMapReady(p0: GoogleMap) {
         mMap=p0
         mMap?.apply {
-            val latitude =30.135984897343306
-            val longitude= 31.366324444040078
-            val home = LatLng(latitude ,longitude)
-            moveCamera(CameraUpdateFactory.newLatLngZoom(home,15f ))
+
             setMapLongClick(this)
             setPoiClick(this)
             setMapStyle(this)
@@ -229,7 +196,27 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun makehomelocation() {
-        mMap?. setMyLocationEnabled(true)
+        mMap?.apply {
+            isMyLocationEnabled = true
+            client.lastLocation.addOnSuccessListener { location ->
+                val home = LatLng(location.latitude, location.longitude)
+                moveCamera(CameraUpdateFactory.newLatLngZoom(home,15f ))
+                val snippet = String.format(
+                    Locale.getDefault(),
+                    "Lat: %1$.5f, Long: %2$.5f",
+                    home.latitude,
+                    home.longitude
+                )
+                poiMarker= addMarker(
+                    MarkerOptions()
+                        .position(home)
+                        .title(getString(R.string.dropped_pin))
+                        .snippet(snippet)
+                )
+                val poi=PointOfInterest(poiMarker!!.position,poiMarker!!.id,poiMarker!!.title!!)
+                _viewModel.selectedPOI.value=poi
+            }
+        }
     }
 
     private fun setPoiClick(mMap: GoogleMap) {
