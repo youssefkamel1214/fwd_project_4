@@ -65,7 +65,7 @@ class RemindersListViewModelTest {
     fun returnerror(){
         remindersRepository.seterror(true)
         remindersViewModel.loadReminders()
-        Assert.assertThat(remindersViewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("Reminders not found"))
+        Assert.assertThat(remindersViewModel.showSnackBar.getOrAwaitValue(), CoreMatchers.`is`("Data base error"))
 
     }
     //TODO: provide testing to the RemindersListViewModel and its live data objects

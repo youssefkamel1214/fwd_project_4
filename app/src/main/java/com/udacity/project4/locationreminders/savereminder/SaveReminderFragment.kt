@@ -149,8 +149,17 @@ class SaveReminderFragment : BaseFragment() {
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender
+                        , REQUEST_TURN_DEVICE_LOCATION_ON
+                        , null
+                        , 0
+                        , 0
+                        ,0
+                        ,null
+                    )
                     exception.startResolutionForResult(requireActivity(),
-                        Constants.REQUEST_TURN_DEVICE_LOCATION_ON
+                        REQUEST_TURN_DEVICE_LOCATION_ON
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Toast.makeText(context,sendEx.message, Toast.LENGTH_LONG).show()

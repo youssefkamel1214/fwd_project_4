@@ -10,6 +10,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.*
 import androidx.core.content.ContextCompat
@@ -198,24 +199,35 @@ class SelectLocationFragment : BaseFragment(),OnMapReadyCallback {
     private fun makehomelocation() {
         mMap?.apply {
             isMyLocationEnabled = true
-            client.lastLocation.addOnSuccessListener { location ->
-                val home = LatLng(location.latitude, location.longitude)
-                moveCamera(CameraUpdateFactory.newLatLngZoom(home,15f ))
-                val snippet = String.format(
-                    Locale.getDefault(),
-                    "Lat: %1$.5f, Long: %2$.5f",
-                    home.latitude,
-                    home.longitude
-                )
-                poiMarker= addMarker(
-                    MarkerOptions()
-                        .position(home)
-                        .title(getString(R.string.dropped_pin))
-                        .snippet(snippet)
-                )
-                val poi=PointOfInterest(poiMarker!!.position,poiMarker!!.id,poiMarker!!.title!!)
-                _viewModel.selectedPOI.value=poi
+             val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    result.lastLocation?.let {
+                        val home = LatLng(it.latitude, it.longitude)
+                        client.removeLocationUpdates(this)
+                        moveCamera(CameraUpdateFactory.newLatLngZoom(home,15f ))
+                        val snippet = String.format(
+                            Locale.getDefault(),
+                            "Lat: %1$.5f, Long: %2$.5f",
+                            home.latitude,
+                            home.longitude
+                        )
+                        poiMarker= addMarker(
+                            MarkerOptions()
+                                .position(home)
+                                .title("Dropped Pin")
+                                .snippet(snippet)
+                        )
+                        val poi=PointOfInterest(poiMarker!!.position,poiMarker!!.id,poiMarker!!.title!!)
+                        _viewModel.selectedPOI.value=poi
+                    }
+
+                }
             }
+            val locationRequest = LocationRequest.create()
+            locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            locationRequest.interval = 5000
+            client.requestLocationUpdates(locationRequest, locationCallback,
+                Looper.getMainLooper())
         }
     }
 
